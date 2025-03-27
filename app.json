@@ -1,31 +1,60 @@
 {
   "expo": {
-    "name": "Natively",
-    "slug": "Natively",
+    "name": "Serenity",
+    "slug": "serenity-meditation",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./public/pwa-64x64.png",
-    "userInterfaceStyle": "light",
+    "icon": "./public/pwa-512x512.png",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./public/pwa-512x512.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#141414"
     },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.Natively"
+      "bundleIdentifier": "com.serenity.meditation",
+      "buildNumber": "1",
+      "infoPlist": {
+        "UIBackgroundModes": ["audio"],
+        "NSMicrophoneUsageDescription": "This app does not require microphone access."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./public/pwa-512x512.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#141414"
       },
-      "package": "com.anonymous.Natively"
+      "package": "com.serenity.meditation",
+      "versionCode": 1,
+      "permissions": []
     },
     "web": {
       "favicon": "./public/pwa-64x64.png",
-      "bundler": "metro"
+      "bundler": "metro",
+      "output": "static",
+      "name": "Serenity Meditation"
+    },
+    "plugins": [
+      "expo-font"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "your-project-id"
+      }
+    },
+    "owner": "serenity-team",
+    "scheme": "serenity",
+    "updates": {
+      "fallbackToCacheTimeout": 0,
+      "url": "https://u.expo.dev/your-project-id"
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
     }
   }
 }

@@ -2,6 +2,8 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { Audio } from 'expo-av';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
+import { Storage } from '../utils/storage';
+import { Analytics } from '../utils/analytics';
 
 interface Sound {
   id: string;
@@ -45,6 +47,7 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
   const [currentSound, setCurrentSound] = useState<Sound | null>(null);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isAudioConfigured, setIsAudioConfigured] = useState(false);
 
   // Configure audio session
   useEffect(() => {
@@ -55,6 +58,7 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
           staysActiveInBackground: true,
           shouldDuckAndroid: true,
         });
+        setIsAudioConfigured(true);
       } catch (error) {
         console.error('Failed to configure audio mode', error);
       }
@@ -63,11 +67,33 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
     configureAudio();
   }, []);
 
+  // Load last used sound from storage
+  useEffect(() => {
+    async function loadSavedSound() {
+      if (!isAudioConfigured) return;
+      
+      try {
+        const lastSoundId = await Storage.getLastUsedSound();
+        if (lastSoundId) {
+          const savedSound = sounds.find(s => s.id === lastSoundId);
+          if (savedSound) {
+            setCurrentSound(savedSound);
+            // Don't auto-play when app first loads
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load saved sound', error);
+      }
+    }
+    
+    loadSavedSound();
+  }, [isAudioConfigured]);
+
   // Unload sound when component unmounts
   useEffect(() => {
     return () => {
       if (sound) {
-        sound.unloadAsync();
+        sound.unloadAsync().catch(console.error);
       }
     };
   }, [sound]);
@@ -79,17 +105,27 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 
     // Provide haptic feedback
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(console.error);
     }
 
     // Unload previous sound if exists
     if (sound) {
-      await sound.unloadAsync();
+      try {
+        await sound.unloadAsync();
+      } catch (error) {
+        console.error('Error unloading sound', error);
+      }
       setSound(null);
       setIsPlaying(false);
     }
 
     setCurrentSound(selectedSound);
+    
+    // Log analytics event
+    Analytics.logEvent('sound_selected', { sound_id: id });
+    
+    // Save selection to storage
+    Storage.setLastUsedSound(id).catch(console.error);
 
     // Load and play the new sound
     try {
@@ -112,7 +148,7 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 
     // Provide haptic feedback
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(console.error);
     }
 
     try {

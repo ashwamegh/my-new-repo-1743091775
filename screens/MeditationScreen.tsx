@@ -6,10 +6,11 @@ import {
   TouchableOpacity, 
   Animated, 
   Dimensions,
-  Platform 
+  Platform,
+  BackHandler
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
 import * as Haptics from 'expo-haptics';
@@ -17,6 +18,8 @@ import { useSounds } from '../context/SoundContext';
 import { useTheme } from '../context/ThemeContext';
 import SoundSelector from '../components/SoundSelector';
 import BreathingAnimation from '../components/BreathingAnimation';
+import { Storage } from '../utils/storage';
+import { Analytics } from '../utils/analytics';
 
 const { width } = Dimensions.get('window');
 
@@ -30,6 +33,7 @@ export default function MeditationScreen() {
   const [isActive, setIsActive] = useState(false);
   const [showSoundSelector, setShowSoundSelector] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [sessionId, setSessionId] = useState('');
   
   const { currentSound, isPlaying, toggleSound } = useSounds();
   
@@ -43,6 +47,23 @@ export default function MeditationScreen() {
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
+
+  // Handle Android back button
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        if (isActive && !isCompleted) {
+          // Show confirmation dialog before exiting a session
+          // This is just a placeholder as we don't have a dialog component
+          return true; // Prevent default behavior
+        }
+        return false; // Let default behavior happen
+      };
+
+      const subscription = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+      return () => subscription.remove();
+    }, [isActive, isCompleted])
+  );
 
   // Entry animations
   useEffect(() => {
@@ -58,6 +79,12 @@ export default function MeditationScreen() {
         useNativeDriver: true,
       }),
     ]).start();
+
+    // Create a unique session ID
+    setSessionId(`session_${Date.now()}`);
+    
+    // Log screen view
+    Analytics.logScreen('Meditation');
   }, [fadeAnim, slideAnim]);
 
   // Timer countdown logic
@@ -68,34 +95,74 @@ export default function MeditationScreen() {
       interval = setInterval(() => {
         setTimeRemaining((time) => time - 1);
       }, 1000);
-    } else if (timeRemaining === 0 && !isCompleted) {
+    } else if (timeRemaining === 0 && !isCompleted && isActive) {
       setIsActive(false);
       setIsCompleted(true);
+      
+      // Log completed session
+      const completedSession = {
+        id: sessionId,
+        date: new Date().toISOString(),
+        duration: duration,
+        completed: true,
+      };
+      
+      Storage.addMeditationSession(completedSession).catch(console.error);
+      Analytics.logEvent('session_completed', { duration });
+      
       if (Platform.OS !== 'web') {
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(console.error);
       }
     }
     
     return () => clearInterval(interval);
-  }, [isActive, timeRemaining, isCompleted]);
+  }, [isActive, timeRemaining, isCompleted, duration, sessionId]);
 
   const toggleTimer = () => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(console.error);
     }
-    setIsActive(!isActive);
+    
+    const newIsActive = !isActive;
+    setIsActive(newIsActive);
+    
+    if (newIsActive && !isPlaying && currentSound) {
+      toggleSound();
+    }
+    
+    if (newIsActive) {
+      Analytics.logEvent('session_started', { duration });
+    }
   };
 
   const resetTimer = () => {
     if (Platform.OS !== 'web') {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(console.error);
     }
     setIsActive(false);
     setTimeRemaining(duration * 60);
     setIsCompleted(false);
+    
+    // Create a new session ID for the reset session
+    setSessionId(`session_${Date.now()}`);
   };
 
   const handleBackPress = () => {
+    if (isActive && !isCompleted) {
+      // In a real app, you might want to show a confirmation dialog here
+      setIsActive(false);
+      
+      // Log incomplete session
+      const incompleteSession = {
+        id: sessionId,
+        date: new Date().toISOString(),
+        duration: duration,
+        completed: false,
+      };
+      
+      Storage.addMeditationSession(incompleteSession).catch(console.error);
+    }
+    
     navigation.goBack();
   };
 
@@ -115,7 +182,12 @@ export default function MeditationScreen() {
           }
         ]}
       >
-        <TouchableOpacity onPress={handleBackPress} style={styles.backButton}>
+        <TouchableOpacity 
+          onPress={handleBackPress} 
+          style={styles.backButton}
+          accessibilityRole="button"
+          accessibilityLabel="Go back"
+        >
           <Ionicons name="chevron-back" size={28} color={colors.text} />
         </TouchableOpacity>
         <Text style={[styles.title, { color: colors.text }]}>
@@ -136,7 +208,10 @@ export default function MeditationScreen() {
         >
           <BreathingAnimation isActive={isActive} isCompleted={isCompleted} />
           <View style={styles.timeTextContainer}>
-            <Text style={[styles.timeText, { color: colors.text }]}>
+            <Text 
+              style={[styles.timeText, { color: colors.text }]}
+              accessibilityLabel={`${formatTime(timeRemaining)} remaining`}
+            >
               {formatTime(timeRemaining)}
             </Text>
             <Text style={[styles.breatheText, { color: colors.subtext }]}>
@@ -157,6 +232,8 @@ export default function MeditationScreen() {
           <TouchableOpacity 
             style={[styles.resetButton, { backgroundColor: colors.card }]} 
             onPress={resetTimer}
+            accessibilityRole="button"
+            accessibilityLabel="Reset timer"
           >
             <Ionicons name="refresh" size={24} color={colors.primary} />
           </TouchableOpacity>
@@ -165,6 +242,8 @@ export default function MeditationScreen() {
             style={styles.playButton} 
             onPress={toggleTimer}
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={isActive ? "Pause meditation" : "Start meditation"}
           >
             <LinearGradient
               colors={[colors.primary, colors.accent]}
@@ -181,6 +260,8 @@ export default function MeditationScreen() {
           <TouchableOpacity 
             style={[styles.soundButton, { backgroundColor: colors.card }]} 
             onPress={() => setShowSoundSelector(!showSoundSelector)}
+            accessibilityRole="button"
+            accessibilityLabel="Select background sound"
           >
             <Ionicons 
               name={isPlaying ? "volume-high" : "volume-mute"} 
@@ -205,6 +286,8 @@ export default function MeditationScreen() {
             <TouchableOpacity 
               style={[styles.homeButton, { backgroundColor: colors.card }]}
               onPress={handleBackPress}
+              accessibilityRole="button"
+              accessibilityLabel="Return to home screen"
             >
               <Text style={[styles.homeButtonText, { color: colors.primary }]}>
                 Return Home

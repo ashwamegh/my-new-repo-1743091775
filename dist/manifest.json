@@ -1,13 +1,13 @@
 {
-  "name": "Natively",
-  "short_name": "Natively",
-  "start_url": "/",
+  "name": "Serenity Meditation",
+  "short_name": "Serenity",
+  "description": "A mindful meditation app to help you relax and focus",
+  "theme_color": "#141414",
+  "background_color": "#141414",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "lang": "en",
+  "orientation": "portrait",
   "scope": "/",
-  "description": "Natively",
-  "theme_color": "#ffffff",
+  "start_url": "/",
   "icons": [
     {
       "src": "pwa-64x64.png",
@@ -29,6 +29,22 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Quick Focus",
+      "short_name": "Focus",
+      "description": "Start a 5-minute meditation session",
+      "url": "/meditation/5",
+      "icons": [{ "src": "pwa-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Deep Relaxation",
+      "short_name": "Relax",
+      "description": "Start a 15-minute meditation session",
+      "url": "/meditation/15",
+      "icons": [{ "src": "pwa-192x192.png", "sizes": "192x192" }]
     }
   ]
 }

@@ -1,0 +1,57 @@
+ INFO  Accepting connections at http://localhost:8082
+ HTTP  3/27/2025 3:35:50 PM 172.20.0.1 GET /
+ HTTP  3/27/2025 3:35:50 PM 172.20.0.1 Returned 200 in 18 ms
+ HTTP  3/27/2025 3:35:50 PM 172.20.0.1 GET /_expo/static/css/global-f72a62d2075c8088ba50a67e66d8290e.css
+ HTTP  3/27/2025 3:35:50 PM 172.20.0.1 Returned 200 in 3 ms
+ HTTP  3/27/2025 3:35:51 PM 172.20.0.1 GET /_expo/static/js/web/index-421177d51f5d94a333492a81966f4f24.js
+ HTTP  3/27/2025 3:35:51 PM 172.20.0.1 Returned 200 in 5 ms
+ HTTP  3/27/2025 3:35:52 PM 172.20.0.1 GET /assets/public/icosahedron.ea5d98412472b7885d87e61ee4b67a63.svg
+ HTTP  3/27/2025 3:35:52 PM 172.20.0.1 Returned 200 in 4 ms
+ HTTP  3/27/2025 3:56:27 PM 172.20.0.1 GET /
+ HTTP  3/27/2025 3:56:27 PM 172.20.0.1 Returned 200 in 44 ms
+ HTTP  3/27/2025 3:56:28 PM 172.20.0.1 GET /_expo/static/css/global-f72a62d2075c8088ba50a67e66d8290e.css
+ HTTP  3/27/2025 3:56:28 PM 172.20.0.1 Returned 304 in 26 ms
+ HTTP  3/27/2025 3:56:28 PM 172.20.0.1 GET /_expo/static/js/web/index-421177d51f5d94a333492a81966f4f24.js
+ HTTP  3/27/2025 3:56:28 PM 172.20.0.1 Returned 304 in 4 ms
+ HTTP  3/27/2025 3:56:28 PM 172.20.0.1 GET /assets/public/icosahedron.ea5d98412472b7885d87e61ee4b67a63.svg
+ HTTP  3/27/2025 3:56:28 PM 172.20.0.1 Returned 304 in 5 ms
+ HTTP  3/27/2025 4:01:52 PM 172.20.0.1 GET /
+ HTTP  3/27/2025 4:01:52 PM 172.20.0.1 Returned 200 in 4 ms
+ HTTP  3/27/2025 4:01:52 PM 172.20.0.1 GET /_expo/static/css/global-7e18f9fa2a8cea241a67b0c165f0dcb2.css
+ HTTP  3/27/2025 4:01:52 PM 172.20.0.1 Returned 200 in 2 ms
+ HTTP  3/27/2025 4:01:53 PM 172.20.0.1 GET /_expo/static/js/web/index-7537227be90216fa7e2af0a1aeaff276.js
+ HTTP  3/27/2025 4:01:53 PM 172.20.0.1 Returned 200 in 8 ms
+ HTTP  3/27/2025 4:01:54 PM 172.20.0.1 GET /assets/node_modules/@expo-google-fonts/inter/Inter_400Regular.079af0e2936ccb99b391ddc0bbb73dcb.ttf
+ HTTP  3/27/2025 4:01:54 PM 172.20.0.1 Returned 200 in 4 ms
+ HTTP  3/27/2025 4:01:54 PM 172.20.0.1 GET /assets/node_modules/@expo-google-fonts/inter/Inter_700Bold.275bfea5dc74c33f51916fee80feae67.ttf
+ HTTP  3/27/2025 4:01:54 PM 172.20.0.1 Returned 200 in 4 ms
+ HTTP  3/27/2025 4:01:55 PM 172.20.0.1 GET /assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.6148e7019854f3bde85b633cb88f3c25.ttf
+ HTTP  3/27/2025 4:01:55 PM 172.20.0.1 Returned 200 in 6 ms
+ HTTP  3/27/2025 4:07:26 PM 172.20.0.1 GET /assets/node_modules/@expo-google-fonts/inter/Inter_400Regular.079af0e2936ccb99b391ddc0bbb73dcb.ttf
+ HTTP  3/27/2025 4:07:26 PM 172.20.0.1 Returned 304 in 2 ms
+ HTTP  3/27/2025 4:07:26 PM 172.20.0.1 GET /assets/node_modules/@expo-google-fonts/inter/Inter_700Bold.275bfea5dc74c33f51916fee80feae67.ttf
+ HTTP  3/27/2025 4:07:26 PM 172.20.0.1 Returned 304 in 2 ms
+ HTTP  3/27/2025 4:07:50 PM 172.20.0.1 GET /assets/assets/sounds/rain.c64852b8311545e7a2b790c5e19663dc.mp3
+ HTTP  3/27/2025 4:07:50 PM 172.20.0.1 Returned 206 in 16 ms
+ HTTP  3/27/2025 4:08:26 PM 172.20.0.1 GET /assets/assets/sounds/forest.28b71557fe4808251e3ed03c89fbfb61.mp3
+ HTTP  3/27/2025 4:08:26 PM 172.20.0.1 Returned 206 in 8 ms
+ HTTP  3/27/2025 4:10:05 PM 172.20.0.1 GET /
+ HTTP  3/27/2025 4:10:05 PM 172.20.0.1 Returned 304 in 1 ms
+ HTTP  3/27/2025 4:10:05 PM 172.20.0.1 GET /_expo/static/css/global-7e18f9fa2a8cea241a67b0c165f0dcb2.css
+ HTTP  3/27/2025 4:10:05 PM 172.20.0.1 Returned 304 in 2 ms
+ HTTP  3/27/2025 4:10:05 PM 172.20.0.1 GET /_expo/static/js/web/index-7537227be90216fa7e2af0a1aeaff276.js
+ HTTP  3/27/2025 4:10:05 PM 172.20.0.1 Returned 304 in 2 ms
+ HTTP  3/27/2025 4:10:06 PM 172.20.0.1 GET /assets/node_modules/@expo-google-fonts/inter/Inter_400Regular.079af0e2936ccb99b391ddc0bbb73dcb.ttf
+ HTTP  3/27/2025 4:10:06 PM 172.20.0.1 Returned 304 in 1 ms
+ HTTP  3/27/2025 4:10:06 PM 172.20.0.1 GET /assets/node_modules/@expo-google-fonts/inter/Inter_700Bold.275bfea5dc74c33f51916fee80feae67.ttf
+ HTTP  3/27/2025 4:10:06 PM 172.20.0.1 Returned 304 in 1 ms
+ HTTP  3/27/2025 4:10:07 PM 172.20.0.1 GET /assets/node_modules/@expo/vector-icons/build/vendor/react-native-vector-icons/Fonts/Ionicons.6148e7019854f3bde85b633cb88f3c25.ttf
+ HTTP  3/27/2025 4:10:07 PM 172.20.0.1 Returned 304 in 1 ms
+ HTTP  3/27/2025 4:10:24 PM 172.20.0.1 GET /assets/node_modules/@expo-google-fonts/inter/Inter_700Bold.275bfea5dc74c33f51916fee80feae67.ttf
+ HTTP  3/27/2025 4:10:24 PM 172.20.0.1 Returned 304 in 3 ms
+ HTTP  3/27/2025 4:10:24 PM 172.20.0.1 GET /assets/node_modules/@expo-google-fonts/inter/Inter_400Regular.079af0e2936ccb99b391ddc0bbb73dcb.ttf
+ HTTP  3/27/2025 4:10:24 PM 172.20.0.1 Returned 304 in 2 ms
+ HTTP  3/27/2025 4:10:45 PM 172.20.0.1 GET /assets/assets/sounds/wave.bcf8c360884e46ff6108768024d11b2e.mp3
+ HTTP  3/27/2025 4:10:45 PM 172.20.0.1 Returned 206 in 3 ms
+ HTTP  3/27/2025 4:13:09 PM 172.20.0.1 GET /assets/assets/sounds/rain.c64852b8311545e7a2b790c5e19663dc.mp3
+ HTTP  3/27/2025 4:13:09 PM 172.20.0.1 Returned 206 in 1 ms
