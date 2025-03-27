@@ -1,0 +1,31 @@
+{
+  "expo": {
+    "name": "Natively",
+    "slug": "Natively",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./public/pwa-64x64.png",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./public/pwa-512x512.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.Natively"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./public/pwa-512x512.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.anonymous.Natively"
+    },
+    "web": {
+      "favicon": "./public/pwa-64x64.png",
+      "bundler": "metro"
+    }
+  }
+}
