@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { 
   View, 
   Text, 
@@ -14,46 +14,148 @@ import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useTheme } from '../context/ThemeContext';
+import { Storage } from '../utils/storage';
+import { MeditationSession } from '../utils/database';
 
 const { width } = Dimensions.get('window');
+
+// Helper function to group meditation sessions by day
+const groupSessionsByDay = (sessions: MeditationSession[]) => {
+  const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const today = new Date();
+  const dayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+  
+  // Initialize data for each day of the week with 0 minutes
+  const weekData = days.map(day => ({ day, minutes: 0 }));
+  
+  // Calculate the date for the start of the week (Sunday)
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - dayOfWeek);
+  startOfWeek.setHours(0, 0, 0, 0);
+  
+  // Process each session
+  sessions.forEach(session => {
+    const sessionDate = new Date(session.date);
+    
+    // Only include sessions from the current week
+    if (sessionDate >= startOfWeek) {
+      const dayIndex = sessionDate.getDay();
+      weekData[dayIndex].minutes += Math.floor(session.duration / 60); // Convert seconds to minutes
+    }
+  });
+  
+  // Reorder to start with Monday
+  const mondayIndex = days.indexOf('Mon');
+  return [...weekData.slice(mondayIndex), ...weekData.slice(0, mondayIndex)];
+};
+
+// Helper function to calculate current streak
+const calculateStreak = (sessions: MeditationSession[]) => {
+  if (sessions.length === 0) return 0;
+  
+  // Sort sessions by date (newest first)
+  const sortedSessions = [...sessions].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  // Check if there's a session today
+  const latestSessionDate = new Date(sortedSessions[0].date);
+  latestSessionDate.setHours(0, 0, 0, 0);
+  
+  // If no session today, no streak
+  if (latestSessionDate.getTime() !== today.getTime() &&
+      latestSessionDate.getTime() !== today.getTime() - 86400000) {
+    return 0;
+  }
+  
+  let streak = 1;
+  let currentDate = latestSessionDate;
+  
+  // Go through previous days
+  for (let i = 1; i < sortedSessions.length; i++) {
+    const prevDate = new Date(sortedSessions[i].date);
+    prevDate.setHours(0, 0, 0, 0);
+    
+    // Check if this session is from the previous day
+    const expectedPrevDate = new Date(currentDate);
+    expectedPrevDate.setDate(currentDate.getDate() - 1);
+    
+    if (prevDate.getTime() === expectedPrevDate.getTime()) {
+      streak++;
+      currentDate = prevDate;
+    } else {
+      break;
+    }
+  }
+  
+  return streak;
+};
 
 export default function StatsScreen() {
   const navigation = useNavigation();
   const { colors } = useTheme();
+  const [meditationData, setMeditationData] = useState<{ day: string; minutes: number }[]>([]);
+  const [totalMinutes, setTotalMinutes] = useState(0);
+  const [sessionsCompleted, setSessionsCompleted] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [loading, setLoading] = useState(true);
   
   // Animation values
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(50)).current;
   
-  // Simulated meditation data
-  const meditationData = [
-    { day: 'Mon', minutes: 10 },
-    { day: 'Tue', minutes: 15 },
-    { day: 'Wed', minutes: 5 },
-    { day: 'Thu', minutes: 20 },
-    { day: 'Fri', minutes: 10 },
-    { day: 'Sat', minutes: 0 },
-    { day: 'Sun', minutes: 15 },
-  ];
-  
-  const totalMinutes = meditationData.reduce((acc, curr) => acc + curr.minutes, 0);
-  const sessionsCompleted = meditationData.filter(d => d.minutes > 0).length;
-  const maxMinutes = Math.max(...meditationData.map(d => d.minutes));
+  useEffect(() => {
+    const fetchMeditationData = async () => {
+      try {
+        // Get meditation history from storage
+        const sessions = await Storage.getMeditationHistory();
+        
+        // Process data for the chart
+        const weekData = groupSessionsByDay(sessions);
+        setMeditationData(weekData);
+        
+        // Calculate total minutes
+        const minutes = sessions.reduce((total, session) => 
+          total + Math.floor(session.duration / 60), 0);
+        setTotalMinutes(minutes);
+        
+        // Calculate sessions completed
+        setSessionsCompleted(sessions.filter(s => s.completed).length);
+        
+        // Calculate streak
+        setStreak(calculateStreak(sessions));
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching meditation data', error);
+        setLoading(false);
+      }
+    };
+    
+    fetchMeditationData();
+  }, []);
   
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 800,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  }, [fadeAnim, slideAnim]);
+    if (!loading) {
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [fadeAnim, slideAnim, loading]);
+
+  const maxMinutes = Math.max(...meditationData.map(d => d.minutes), 1);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]}>
@@ -122,69 +224,34 @@ export default function StatsScreen() {
           
           <View style={styles.chartContainer}>
             <View style={styles.barContainer}>
-              {meditationData.map((data, index) => {
-                // Maps are not supported on web in Natively
-                if (Platform.OS === 'web') {
-                  return (
-                    <View key={index} style={styles.barItem}>
-                      <View 
-                        style={[
-                          styles.barWrapper, 
-                          { backgroundColor: colors.card }
-                        ]}
-                      >
-                        <Animated.View
-                          style={[
-                            styles.bar,
-                            {
-                              height: fadeAnim.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [0, (data.minutes / maxMinutes) * 150],
-                              }),
-                            },
-                          ]}
-                        >
-                          <LinearGradient
-                            colors={[colors.primary, colors.accent]}
-                            style={styles.barGradient}
-                          />
-                        </Animated.View>
-                      </View>
-                      <Text style={[styles.barLabel, { color: colors.subtext }]}>{data.day}</Text>
-                    </View>
-                  );
-                } else {
-                  // For iOS and Android, render the same content
-                  return (
-                    <View key={index} style={styles.barItem}>
-                      <View 
-                        style={[
-                          styles.barWrapper, 
-                          { backgroundColor: colors.card }
-                        ]}
-                      >
-                        <Animated.View
-                          style={[
-                            styles.bar,
-                            {
-                              height: fadeAnim.interpolate({
-                                inputRange: [0, 1],
-                                outputRange: [0, (data.minutes / maxMinutes) * 150],
-                              }),
-                            },
-                          ]}
-                        >
-                          <LinearGradient
-                            colors={[colors.primary, colors.accent]}
-                            style={styles.barGradient}
-                          />
-                        </Animated.View>
-                      </View>
-                      <Text style={[styles.barLabel, { color: colors.subtext }]}>{data.day}</Text>
-                    </View>
-                  );
-                }
-              })}
+              {meditationData.map((data, index) => (
+                <View key={index} style={styles.barItem}>
+                  <View 
+                    style={[
+                      styles.barWrapper, 
+                      { backgroundColor: colors.card }
+                    ]}
+                  >
+                    <Animated.View
+                      style={[
+                        styles.bar,
+                        {
+                          height: fadeAnim.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [0, (data.minutes / maxMinutes) * 150],
+                          }),
+                        },
+                      ]}
+                    >
+                      <LinearGradient
+                        colors={[colors.primary, colors.accent]}
+                        style={styles.barGradient}
+                      />
+                    </Animated.View>
+                  </View>
+                  <Text style={[styles.barLabel, { color: colors.subtext }]}>{data.day}</Text>
+                </View>
+              ))}
             </View>
           </View>
         </Animated.View>
@@ -207,7 +274,7 @@ export default function StatsScreen() {
           
           <View style={[styles.streakCard, { backgroundColor: colors.card }]}>
             <View style={styles.streakInfo}>
-              <Text style={[styles.streakValue, { color: colors.text }]}>3</Text>
+              <Text style={[styles.streakValue, { color: colors.text }]}>{streak}</Text>
               <Text style={[styles.streakLabel, { color: colors.subtext }]}>Days in a row</Text>
             </View>
             <View style={styles.streakIconContainer}>
@@ -221,7 +288,9 @@ export default function StatsScreen() {
           </View>
           
           <Text style={[styles.streakMessage, { color: colors.text }]}>
-            Keep going! You're building a great habit.
+            {streak > 0 
+              ? "Keep going! You're building a great habit."
+              : "Complete a meditation session today to start your streak!"}
           </Text>
         </Animated.View>
       </ScrollView>

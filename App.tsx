@@ -17,6 +17,8 @@ import { SoundProvider } from './context/SoundContext';
 import { ThemeProvider } from './context/ThemeContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import { Analytics } from './utils/analytics';
+import { Storage } from './utils/storage';
+import { DB } from './utils/database';
 import './global.css';
 
 // Keep splash screen visible until we're ready
@@ -75,6 +77,26 @@ export default function App() {
   // Initialize analytics
   useEffect(() => {
     Analytics.initialize().catch(console.error);
+  }, []);
+
+  // Initialize database
+  useEffect(() => {
+    const initDatabase = async () => {
+      try {
+        // For web, no need to initialize anything
+        if (Platform.OS !== 'web') {
+          // Execute a simple query to ensure database is initialized
+          await DB.execute('SELECT 1');
+        }
+        
+        // Initialize storage service (which depends on the database)
+        await Storage.getSettings();
+      } catch (e) {
+        console.warn('Failed to initialize database', e);
+      }
+    };
+
+    initDatabase();
   }, []);
 
   // Handle initial deep link
